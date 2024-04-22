@@ -1,0 +1,34 @@
+# Virtual environments
+*venv/
+.env
+
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Editor/IDE specific files and directories
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Environment configuration files
+.env*
+
+# Dependency management files
+poetry.lock
+pyproject.toml
+
+# Database files or directories
+db.sqlite3
+migrations/
+
+# Configuration files with sensitive information
+config.ini
+
+# Cached files or directories
+.cache/
+.pytest_cache/
+__pycache__
