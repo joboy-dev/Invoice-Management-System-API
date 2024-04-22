@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
+from typing import Optional
 from uuid import uuid4
 from pydantic import BaseModel
 import sqlalchemy as sa
@@ -22,7 +22,7 @@ class User(Base):
     
     __tablename__ = 'users'
     
-    id = sa.Column(sa.UUID, primary_key=True, server_default=f'{uuid4()}')
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
     email = sa.Column(sa.String, unique=True, nullable=False)
     password = sa.Column(sa.String, nullable=False)
     first_name = sa.Column(sa.String, nullable=False)
@@ -33,40 +33,13 @@ class User(Base):
     is_active = sa.Column(sa.Boolean, nullable=False, server_default='True')
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
-
-class UserModel(BaseModel):
-    '''Users pydantic model'''
-    
-    id = uuid4
-    email: str
-    password: str
-    first_name: str
-    last_name: str
-    profile_pic: Path
-    role: Role = Role.customer
-    is_verified: bool
-    is_active: bool
-    created_at: datetime = datetime.now()
-    
-
-# --------------------------------------------------------------- 
-# --------------------------------------------------------------- 
-    
     
 class Customer(Base):
     '''Customers model'''
     
     __tablename__ = 'customers'
     
-    id = sa.Column(sa.UUID, primary_key=True, server_default=f'{uuid4()}')
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
     phone_number = sa.Column(sa.String, nullable=False)
     billing_address = sa.Column(sa.String, nullable=False)
-    
-
-class CustomerModel(BaseModel):
-    '''Customers pydantic model'''
-    
-    id = uuid4
-    phone_number: str
-    billing_address: str
     

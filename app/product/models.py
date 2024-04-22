@@ -1,7 +1,9 @@
 from datetime import datetime
+import uuid
 from uuid import uuid4
 from pydantic import BaseModel
 import sqlalchemy as sa
+from sqlalchemy.sql.expression import text
 
 from app.database import Base
 
@@ -10,17 +12,9 @@ class Product(Base):
     
     __tablename__ = 'products'
     
-    id = sa.Column(sa.UUID, primary_key=True, server_default=f'{uuid4()}')
-    name = sa.Column(sa.String, nullable=False)
-    description = sa.Column(sa.String, nullable=False)
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
+    name = sa.Column(sa.String(length=255), nullable=False)
+    description = sa.Column(sa.String(length=255), nullable=False)
     unit_price = sa.Column(sa.Float, nullable=False, server_default='0.00')
-    
-
-class ProductModel(BaseModel):
-    '''Product pydantic model'''
-    
-    id = uuid4
-    name: str
-    description: str
-    unit_price: float = 0.00
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     

@@ -22,13 +22,13 @@ product_models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title='Invoice Management System',
     version='1.0',
-    description='A system used to manage invoices of prodicts purchased.',
+    description='A system used to manage invoices of products purchased. Can be especially useful for retail stores and even big supermarkets.',
 )
 
 # Allowed hosts
 origins = ['https://localhost:3000']
 
-# Add midddleware
+# Add CORS midddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

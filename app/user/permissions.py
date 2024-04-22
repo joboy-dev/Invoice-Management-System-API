@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 
+from app.user.models import User
+
 class UserPermissions:
     '''Permission class for user permissions'''
     
@@ -7,7 +9,7 @@ class UserPermissions:
     def is_admin(fn):
         '''Permission function to check if the current logged in user is an admin'''
         
-        def wrapper(user):
+        def wrapper(user: User):
             '''Wrapper function'''
             
             if user.role == 'admin':
@@ -21,7 +23,7 @@ class UserPermissions:
     def is_employee(fn):
         '''Permission function to check if the current logged in user is an employee'''
         
-        def wrapper(user):
+        def wrapper(user: User):
             '''Wrapper function'''
             
             if user.role == 'employee':
