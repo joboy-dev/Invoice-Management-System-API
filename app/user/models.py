@@ -23,11 +23,11 @@ class User(Base):
     __tablename__ = 'users'
     
     id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
-    email = sa.Column(sa.String, unique=True, nullable=False)
+    email = sa.Column(sa.String(length=128), unique=True, nullable=False)
     password = sa.Column(sa.String, nullable=False)
-    first_name = sa.Column(sa.String, nullable=False)
-    last_name = sa.Column(sa.String, nullable=False)
-    profile_pic = sa.Column(sa.String, nullable=False)
+    first_name = sa.Column(sa.String(length=128), nullable=False)
+    last_name = sa.Column(sa.String(length=128), nullable=False)
+    profile_pic = sa.Column(sa.String, nullable=True)
     role = sa.Column(sa.Enum(Role), nullable=False, server_default=Role.customer.value) 
     is_verified = sa.Column(sa.Boolean, nullable=False, server_default='False')
     is_active = sa.Column(sa.Boolean, nullable=False, server_default='True')
