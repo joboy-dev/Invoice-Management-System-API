@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+import uuid
 from pydantic import BaseModel, EmailStr
 
 from app.user.models import Role
@@ -22,12 +23,15 @@ class UserBase(BaseModel):
 class UserResponse(BaseModel):
     '''Users pydantic response schema'''
     
+    id: uuid.UUID
     email: EmailStr
     first_name: str
     last_name: str
     profile_pic: Optional[bytes]
     role: Role = Role.customer
     created_at: datetime
+    is_verified: bool
+    is_active: bool
     
     class Config:
         orm_mode = True
@@ -49,6 +53,13 @@ class LoginUser(BaseModel):
     
     email: EmailStr
     password: str
+    
+
+class UpdateDetails(BaseModel):
+    '''Schema to update user details'''
+    
+    first_name: str
+    last_name: str
 
 
 class UpdateEmail(BaseModel):

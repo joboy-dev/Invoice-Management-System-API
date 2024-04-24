@@ -3,22 +3,23 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.user.utils import Utils
+from app.user.oauth2 import create_access_token
 
 from . import models
 from . import schemas
 
 from app.database import get_db
 
-user_router = APIRouter(prefix='/users')
+auth_router = APIRouter(tags=['Authentication'])
 
-@user_router.post('/register', status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
+@auth_router.post('/register', status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
 def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
     '''Endpoint to register a user'''
     
     # Check if email already exists in database
-    user_query = db.query(models.User).filter(models.User.email==user.email).first()
+    user_email_query = db.query(models.User).filter(models.User.email==user.email).first()
     
-    if user_query:
+    if user_email_query:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User with this email already exists')
     
     # Password validation
@@ -30,6 +31,8 @@ def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail='Password must contain at least one uppercase, lowercase, numerical, and special character'
         )
+        
+    # Verify email
         
     # Perform password hashing
     user.password = Utils.hash_password(user.password)
@@ -54,20 +57,28 @@ def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
     return new_user
 
 
-@user_router.post('/login', status_code=status.HTTP_200_OK)
-def login(user: schemas.LoginUser, db: Session = Depends(get_db)):
-    '''Endpoint to log in a user with email and password'''
+@auth_router.post('/login', status_code=status.HTTP_200_OK)
+def login(user_schema: schemas.LoginUser, db: Session = Depends(get_db)):
+    '''
+        Endpoint to log in a user with email and password. An access token will be provided.
+        This token will be a bearer token to be used in headers in this way:
+            headers = {
+                'Authorization': 'Bearer token'
+            }
+    '''
     
     # Check if email exists in database
-    user_query = db.query(models.User).filter(models.User.email==user.email).first()
+    user = db.query(models.User).filter(models.User.email==user_schema.email).first()
     
-    if not user_query:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User with this email does not exist')
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid credentials email')
     
     # Verify password
-    if not Utils.is_password_matched(password=user.password, hash=user_query.password):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Password is incorrect')
+    if not Utils.is_password_matched(password=user_schema.password, hash=user.password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid credentials pword')
     
-    return {'message': f'Successfully logged in as {user_query.email}'}
-        
+    # Create access token and pass pata to be encoded into the token
+    access_token = create_access_token({'user_id': f'{user.id}'})
     
+    # Return token
+    return {'access_token': access_token, 'token_type': 'bearer'}

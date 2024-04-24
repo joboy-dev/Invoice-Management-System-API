@@ -8,13 +8,18 @@ from app.user.permissions import UserPermissions
 from . import models
 from . import schemas
 
-product_router = APIRouter(prefix='/products')
+product_router = APIRouter(prefix='/products', tags=['Products'])
 
 @product_router.get('', status_code=status.HTTP_200_OK, response_model=List[schemas.ProductResponse])
-def get_all_products(limit: int = 10, skip: int = 2, db: Session = Depends(get_db)):
-    '''Endpoint to get all products'''
+def get_all_products(name: str = '', db: Session = Depends(get_db)):
+    '''Endpoint to get all products and search for a product by name'''   
     
-    products = db.query(models.Product).all()
+    # Search functionality
+    products = db.query(models.Product).filter(models.Product.name.ilike(f'%{name}%')).all()
+    
+    if not products:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No products found')
+    
     return products
 
 
@@ -31,19 +36,6 @@ def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(
     db.refresh(new_product)
     
     return new_product
-
-
-@product_router.get('/search', status_code=status.HTTP_200_OK, response_model=List[schemas.ProductResponse])
-def search_products_by_name(q: str, db: Session = Depends(get_db)):
-    '''Endpoint to search for a product by name'''   
-    
-    # Search functionality
-    products = db.query(models.Product).filter(models.Product.name.ilike(f'%{q}%')).all()
-    
-    if not products:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No products found')
-    
-    return products
 
 
 @product_router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)

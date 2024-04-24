@@ -2,8 +2,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .user.views import user_router
-from .product.views import product_router
+from .user.routes import user_router
+from .user.auth import auth_router
+from .product.routes import product_router
 
 # Models
 from .user import models as user_models
@@ -38,5 +39,6 @@ app.add_middleware(
 )
 
 # Include routes
+app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(product_router)
