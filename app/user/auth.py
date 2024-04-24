@@ -60,10 +60,10 @@ def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
 @auth_router.post('/login', status_code=status.HTTP_200_OK)
 def login(user_schema: schemas.LoginUser, db: Session = Depends(get_db)):
     '''
-        Endpoint to log in a user with email and password. An access token will be provided.
-        This token will be a bearer token to be used in headers in this way:
-            headers = {
-                'Authorization': 'Bearer token'
+        Endpoint to log in a user with email and password. An access token will be provided as the response.\n
+        This token will be a bearer token to be used in request headers in this way:\n
+            headers = {\n
+                'Authorization': 'Bearer token'\n
             }
     '''
     
