@@ -16,12 +16,12 @@ def create_access_token(data: dict):
     '''Function to create an access token'''
     
     # Create a copy of data to encode so as to not manipulate actual data
-    to_encode = data.copy()
+    data_to_encode = data.copy()
     
     expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({'exp': expire})
+    data_to_encode.update({'exp': expire})
     
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
     # print(jwt.decode(access_token, SECRET_KEY, algorithms=ALGORITHM))
