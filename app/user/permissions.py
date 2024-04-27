@@ -1,34 +1,52 @@
 from fastapi import HTTPException, status
+from app.user import models
 
-from app.user.models import User
+def exception(message: str, code: int=status.HTTP_403_FORBIDDEN):
+    raise HTTPException(status_code=code, detail=message)
 
-class UserPermissions:
-    '''Permission class for user permissions'''
+# ---------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------
+
+def default_permission(user: models.User):
+    '''Permission to check if the logged in user is active and verified. This is the default general permission'''
     
-    @staticmethod
-    def is_admin(fn):
-        '''Permission function to check if the current logged in user is an admin'''
-        
-        def wrapper(user: User):
-            '''Wrapper function'''
-            
-            if user.role == 'admin':
-                return fn(user)
-            else:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied as you are not an admin.')
-        
-        return wrapper
+    if not user.is_active:
+        raise exception(message='Access denied as you are not an active user.')
+    if not user.is_verified:
+        raise exception(message='Access denied as you are not a verified user. Verify your email address.')
     
-    @staticmethod
-    def is_employee(fn):
-        '''Permission function to check if the current logged in user is an employee'''
-        
-        def wrapper(user: User):
-            '''Wrapper function'''
-            
-            if user.role == 'employee':
-                return fn(user)
-            else:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied as you are not an employee.')
-        
-        return wrapper
+
+def is_staff(user: models.User):
+    '''Permission to check if the logged in user is an employee or admin'''
+    
+    default_permission(user)
+    
+    if not (user.role == 'employee' or user.role == 'admin'):
+        raise exception(message='Access denied as you are not a staff member.')
+    
+    
+def is_admin(user: models.User):
+    '''Permission to check if the logged in user is an admin'''
+    
+    default_permission(user)
+    
+    if not user.role == 'admin':
+        raise exception(message='Access denied as you are not an admin.')
+    
+    
+def is_employee(user: models.User):
+    '''Permission to check if the logged in user is an employee'''
+    
+    default_permission(user)
+    
+    if not user.role == 'employee':
+        raise exception(message='Access denied as you are not an admin.')
+    
+
+def is_customer(user: models.User):
+    '''Permission to check if the logged in user is a customer'''
+    
+    default_permission(user)
+    
+    if not user.role == 'customer':
+        raise exception(message='Access denied as you are not a customer.')

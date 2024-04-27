@@ -1,7 +1,6 @@
 import uuid
 from pydantic import BaseModel
 
-
 class ProductBase(BaseModel):
     '''Products pydantic base schema'''
     

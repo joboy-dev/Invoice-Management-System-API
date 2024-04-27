@@ -1,9 +1,11 @@
+import uuid
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.user.permissions import UserPermissions
+from app.user import oauth2, permissions
+from app.user.models import User
 
 from . import models
 from . import schemas
@@ -17,15 +19,14 @@ def get_all_products(name: str = '', db: Session = Depends(get_db)):
     # Search functionality
     products = db.query(models.Product).filter(models.Product.name.ilike(f'%{name}%')).all()
     
-    if not products:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No products found')
-    
     return products
 
 
 @product_router.post('/create', status_code=status.HTTP_201_CREATED, response_model=schemas.ProductResponse)
-def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(get_db)):
+def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(get_db), user_id: uuid.UUID = Depends(oauth2.get_current_user)):
     '''Endpoint to create a new product'''
+    
+    permissions.is_admin(db.get(User, ident=user_id))
     
     new_product = models.Product(
         **product_schema.model_dump()
@@ -39,7 +40,7 @@ def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(
 
 
 @product_router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
-def get_product_by_id(id, db: Session = Depends(get_db)):
+def get_product_by_id(id, db: Session = Depends(get_db), user_id: uuid.UUID = Depends(oauth2.get_current_user)):
     '''Endpoint to get a specific product'''   
     
     product = db.get(models.Product, ident=id)
@@ -51,8 +52,10 @@ def get_product_by_id(id, db: Session = Depends(get_db)):
 
 
 @product_router.patch('/{id}/update', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
-def update_product(id, product_schema: schemas.CreateProduct, db: Session = Depends(get_db)):
+def update_product(id, product_schema: schemas.CreateProduct, db: Session = Depends(get_db), user_id: uuid.UUID = Depends(oauth2.get_current_user)):
     '''Endpoint to update a specific product'''   
+    
+    permissions.is_admin(db.get(User, ident=user_id))
     
     product_query = db.query(models.Product).filter(models.Product.id == id)
     product = product_query.first()
@@ -67,8 +70,10 @@ def update_product(id, product_schema: schemas.CreateProduct, db: Session = Depe
 
 
 @product_router.delete('/{id}/delete', status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(id, db: Session = Depends(get_db)):
-    '''Endpoint to delete a specific product'''   
+def delete_product(id, db: Session = Depends(get_db), user_id: uuid.UUID = Depends(oauth2.get_current_user)):
+    '''Endpoint to delete a specific product''' 
+    
+    permissions.is_admin(db.get(User, ident=user_id))
     
     product = db.get(models.Product, ident=id)
     

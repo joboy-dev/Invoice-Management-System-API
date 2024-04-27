@@ -9,6 +9,7 @@ from app.user.models import Role
 class UserBase(BaseModel):
     '''Users pydantic schema'''
     
+    username: str
     email: EmailStr
     password: str
     password2: str
@@ -24,11 +25,12 @@ class UserResponse(BaseModel):
     '''Users pydantic response schema'''
     
     id: uuid.UUID
+    username: str
     email: EmailStr
     first_name: str
     last_name: str
     profile_pic: Optional[bytes]
-    role: Role = Role.customer
+    role: Role
     created_at: datetime
     is_verified: bool
     is_active: bool
@@ -40,6 +42,7 @@ class UserResponse(BaseModel):
 class CreateUser(BaseModel):
     '''Schema to create user'''
     
+    username: str
     email: EmailStr
     password: str
     password2: str
@@ -51,13 +54,14 @@ class CreateUser(BaseModel):
 class LoginUser(BaseModel):
     '''Schema to login a user'''
     
-    email: EmailStr
+    username: str
     password: str
     
 
 class UpdateDetails(BaseModel):
     '''Schema to update user details'''
     
+    username: str
     first_name: str
     last_name: str
 
@@ -66,6 +70,10 @@ class UpdateEmail(BaseModel):
     '''Schema to update user email'''
     
     email: EmailStr
+    
+
+class ReveifyEmail(UpdateEmail):
+    pass
     
     
 class ChangePassword(BaseModel):
@@ -86,6 +94,22 @@ class UploadProfilePicture(BaseModel):
 # -------------------------------------------------------
 # -------------------------------------------------------
 
+class Token(BaseModel):
+    '''Schema for access token'''
+    
+    access_token: str
+    token_type: str
+    
+
+class TokenData(BaseModel):
+    '''Schema to structure token data'''
+    
+    id: Optional[uuid.UUID]
+    
+
+# -------------------------------------------------------
+# -------------------------------------------------------
+
 class CustomerBase(BaseModel):
     '''Customers pydantic schema'''
     
@@ -93,7 +117,7 @@ class CustomerBase(BaseModel):
     billing_address: str
     
 
-class CustomerBase(BaseModel):
+class CustomerResponse(BaseModel):
     '''Customers pydantic response schema'''
     
     phone_number: str
@@ -104,6 +128,12 @@ class CustomerBase(BaseModel):
     
 
 class CreateCustomer(CustomerBase):
+    '''Schema to create a new customer'''
+    
+    pass
+
+
+class UpdateCustomer(CustomerBase):
     '''Schema to create a new customer'''
     
     pass

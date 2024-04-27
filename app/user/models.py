@@ -1,9 +1,8 @@
-from datetime import datetime
 from enum import Enum
-from typing import Optional
 from uuid import uuid4
-from pydantic import BaseModel
+
 import sqlalchemy as sa
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 
 from app.database import Base
@@ -22,8 +21,9 @@ class User(Base):
     
     __tablename__ = 'users'
     
-    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
-    email = sa.Column(sa.String(length=128), unique=True, nullable=False)
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    username = sa.Column(sa.String(length=128), unique=True, nullable=False, index=True)
+    email = sa.Column(sa.String(length=128), unique=True, nullable=False, index=True)
     password = sa.Column(sa.String, nullable=False)
     first_name = sa.Column(sa.String(length=128), nullable=False)
     last_name = sa.Column(sa.String(length=128), nullable=False)
@@ -33,13 +33,33 @@ class User(Base):
     is_active = sa.Column(sa.Boolean, nullable=False, server_default='True')
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
+    tokens = relationship('Token', back_populates='user')
+    customer = relationship('Customer', back_populates='user', uselist=False)
+    
+
+class Token(Base):
+    '''Tokens model'''
+    
+    __tablename__ = 'tokens'
+    
+    token = sa.Column(sa.String, unique=True, primary_key=True, nullable=False, index=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    expires = sa.Column(sa.Integer, nullable=False)
+    
+    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey(column='users.id', ondelete='CASCADE'), nullable=False)
+    user = relationship('User', back_populates='tokens')
+    
     
 class Customer(Base):
     '''Customers model'''
     
     __tablename__ = 'customers'
     
-    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4)
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
     phone_number = sa.Column(sa.String, nullable=False)
     billing_address = sa.Column(sa.String, nullable=False)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    
+    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user = relationship('User', back_populates='customer')
     
