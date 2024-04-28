@@ -5,7 +5,6 @@ from pydantic import BaseModel, EmailStr
 
 from app.user.models import Role
 
-
 class UserBase(BaseModel):
     '''Users pydantic schema'''
     
@@ -120,6 +119,7 @@ class CustomerBase(BaseModel):
 class CustomerResponse(BaseModel):
     '''Customers pydantic response schema'''
     
+    id: uuid.UUID
     phone_number: str
     billing_address: str
     
@@ -134,6 +134,6 @@ class CreateCustomer(CustomerBase):
 
 
 class UpdateCustomer(CustomerBase):
-    '''Schema to create a new customer'''
+    '''Schema to update a customer profile'''
     
     pass

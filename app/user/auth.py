@@ -14,18 +14,14 @@ from . import models
 from . import schemas
 
 from app.database import get_db
+from app.config import settings
 
 auth_router = APIRouter(tags=['Authentication'])
 
 def send_verification_mail(user: models.User):
     '''Function to send verification email to a user.'''
     
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent
-    load_dotenv(os.path.join(BASE_DIR, ".env"))
-
-    DEBUG = os.getenv('DEBUG')
-    
-    if DEBUG == 'True':
+    if settings.debug:
         base_url = 'http://127.0.0.1:8000'
     else:
         base_url = 'production url'
@@ -43,7 +39,7 @@ def send_verification_mail(user: models.User):
 # ----------------------------------------------------------------------------------------------------  
     
 
-@auth_router.post('/register', status_code=status.HTTP_201_CREATED)
+@auth_router.post('/auth/register', status_code=status.HTTP_201_CREATED)
 async def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
     '''Endpoint to register a user'''
     
@@ -103,6 +99,9 @@ async def verify_email(request: Request, db: Session = Depends(get_db)):
     user_id = oauth2.decode_access_token(token).get('user_id')
     user = db.get(models.User, ident=user_id)
     
+    if user.is_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Token is invalid')
+    
     user.is_verified = True
     db.commit()
     
@@ -125,7 +124,7 @@ async def reverify_email(schema: schemas.ReveifyEmail, db: Session = Depends(get
     return {'message': f'Check {user.email} for a verification link'}
 
 
-@auth_router.post('/login', status_code=status.HTTP_200_OK, response_model=schemas.Token)
+@auth_router.post('/auth/login', status_code=status.HTTP_200_OK, response_model=schemas.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     '''
         Endpoint to log in a user with username and password. An access token will be provided as the response.\n
@@ -161,7 +160,7 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@auth_router.post('/logout', status_code=status.HTTP_200_OK)
+@auth_router.post('/auth/logout', status_code=status.HTTP_200_OK)
 def logout(db: Session = Depends(get_db), user_id: uuid.UUID = Depends(oauth2.get_current_user)):
     '''Endpoint to logout a user'''
     

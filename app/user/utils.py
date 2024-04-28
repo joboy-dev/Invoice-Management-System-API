@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 from passlib.context import CryptContext
 
+from app.config import settings
+
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 class Utils:
@@ -58,18 +60,12 @@ class Utils:
             * email - The email the verification email should be sent to
         '''
         
-        BASE_DIR = Path(__file__).resolve().parent.parent.parent
-        load_dotenv(os.path.join(BASE_DIR, ".env"))
-
-        EMAIL = os.getenv('MY_EMAIL')
-        PASSWORD = os.getenv('MY_PASSWORD')
-        
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as conn:
                 conn.starttls()
-                conn.login(user=EMAIL, password=PASSWORD)
+                conn.login(user=settings.my_email, password=settings.my_password)
                 conn.sendmail(
-                    from_addr=EMAIL,
+                    from_addr=settings.my_email,
                     to_addrs=data['email'],
                     msg=f"Subject:{data['subject']}\n\n{data['body']}"
                 )

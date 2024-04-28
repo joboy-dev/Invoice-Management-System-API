@@ -31,3 +31,7 @@ config.ini
 .cache/
 .pytest_cache/
 __pycache__
+
+# Miscellaneous
+uploads/
+media/
