@@ -151,7 +151,7 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
     token = models.Token(
         token=access_token,
         user_id=user.id,
-        expires=oauth2.decode_access_token(access_token).get('exp')
+        expires=datetime.fromtimestamp(oauth2.decode_access_token(access_token).get('exp'))
     )
     db.add(token)
     db.commit()

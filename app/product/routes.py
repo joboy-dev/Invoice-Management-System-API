@@ -26,7 +26,7 @@ def get_all_products(name: str = '', limit: int = 10, skip: int = 0, db: Session
 def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to create a new product'''
     
-    permissions.is_admin_or_manager(current_user)
+    permissions.is_staff(current_user)
     
     new_product = models.Product(
         **product_schema.model_dump()
@@ -55,7 +55,7 @@ def get_product_by_id(id, db: Session = Depends(get_db), current_user: user_mode
 def update_product(id, product_schema: schemas.CreateProduct, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to update a specific product'''   
     
-    permissions.is_admin_or_manager(current_user)
+    permissions.is_staff(current_user)
     
     product_query = db.query(models.Product).filter(models.Product.id == id)
     product = product_query.first()
@@ -73,7 +73,7 @@ def update_product(id, product_schema: schemas.CreateProduct, db: Session = Depe
 def delete_product(id, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to delete a specific product''' 
     
-    permissions.is_admin_or_manager(current_user)
+    permissions.is_staff(current_user)
     
     product = db.get(models.Product, ident=id)
     

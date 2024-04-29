@@ -21,17 +21,8 @@ def is_staff(user: models.User):
     
     default_permission(user)
     
-    if not (user.role == 'employee' or user.role == 'manager' or user.role == 'admin'):
+    if not (user.role == 'seller' or user.role == 'admin'):
         raise forbidden_exception(message='Access denied as you are not a staff member.')
-    
-    
-def is_admin_or_manager(user: models.User):
-    '''Permission to check if the logged in user is a manager or admin'''
-    
-    default_permission(user)
-    
-    if not (user.role == 'manager' or user.role == 'admin'):
-        raise forbidden_exception(message='Access denied as you are not a manager or admin.')
     
     
 def is_admin(user: models.User):
@@ -43,22 +34,13 @@ def is_admin(user: models.User):
         raise forbidden_exception(message='Access denied as you are not an admin.')
     
     
-def is_employee(user: models.User):
-    '''Permission to check if the logged in user is an employee'''
+def is_seller(user: models.User):
+    '''Permission to check if the logged in user is an seller'''
     
     default_permission(user)
     
-    if not user.role == 'employee':
-        raise forbidden_exception(message='Access denied as you are not an employee.')
-    
-
-def is_manager(user: models.User):
-    '''Permission to check if the logged in user is an manager'''
-    
-    default_permission(user)
-    
-    if not user.role == 'manager':
-        raise forbidden_exception(message='Access denied as you are not a manager.')
+    if not user.role == 'seller':
+        raise forbidden_exception(message='Access denied as you are not an seller.')
     
 
 def is_customer(user: models.User):

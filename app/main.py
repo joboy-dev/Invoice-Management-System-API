@@ -6,19 +6,9 @@ from .user.auth import auth_router
 from .product.routes import product_router
 from .invoice.routes import invoice_router
 
-# Models
-from .user import models as user_models
-from .product import models as product_models
-
-from app.database import engine
-
-# Create all models
-user_models.Base.metadata.create_all(bind=engine)
-product_models.Base.metadata.create_all(bind=engine)
-
-# --------------------------------------------------------
+# --------------------------------------------------------------
 # App configurations
-# --------------------------------------------------------
+# --------------------------------------------------------------
 
 app = FastAPI(
     title='Invoice Management System',
@@ -34,7 +24,7 @@ app = FastAPI(
 )
 
 # Allowed hosts
-origins = ['https://localhost:3000']
+origins = ['*']
 
 # Add CORS midddleware
 app.add_middleware(

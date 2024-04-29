@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
-import datetime as dt
 from typing import List
-import uuid
 from secrets import token_hex
 
 from fastapi import APIRouter, UploadFile, File, status, HTTPException, Depends
@@ -160,6 +158,10 @@ def delete_user(db: Session = Depends(get_db), current_user: models.User = Depen
     return {'message': 'User deletion successful'}
 
 
+# -----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+
+
 @user_router.post('/profile/customer/add', status_code=status.HTTP_201_CREATED, response_model=schemas.CustomerResponse)
 def create_customer_profile(customer: schemas.CreateCustomer, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint for user to create customer profile'''
@@ -195,4 +197,44 @@ def update_customer_profile(customer_schema: schemas.UpdateCustomer, db: Session
     db.commit()
     
     return customer_query.first()
+
+
+# -----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+
+
+@user_router.post('/profile/seller/add', status_code=status.HTTP_201_CREATED, response_model=schemas.SellerResponse)
+def create_seller_profile(seller_schema: schemas.CreateSeller, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint for user to create seller profile'''
+    
+    permissions.is_seller(current_user)
+    
+    # Check if customer profile exists
+    if db.query(models.Seller).filter(models.Seller.user_id == current_user.id).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Seller profile already exists for this user.')
+    
+    new_seller = models.Seller(
+        user_id=current_user.id,
+        **seller_schema.model_dump()
+    )
+    
+    db.add(new_seller)
+    db.commit()
+    db.refresh(new_seller)
+    
+    return new_seller
+
+
+@user_router.patch('/profile/seller/update', status_code=status.HTTP_201_CREATED, response_model=schemas.SellerResponse)
+def update_seller_profile(seller_schema: schemas.UpdateSeller, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint for user to update seller profile'''
+    
+    permissions.is_seller(current_user)
+    
+    seller_query = db.query(models.Seller).filter(models.Seller.user_id == current_user.id)
+    
+    seller_query.update(seller_schema.model_dump(), synchronize_session=False)
+    db.commit()
+    
+    return seller_query.first()
     

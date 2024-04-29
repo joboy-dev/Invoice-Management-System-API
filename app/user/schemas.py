@@ -109,6 +109,7 @@ class TokenData(BaseModel):
 # -------------------------------------------------------
 # -------------------------------------------------------
 
+
 class CustomerBase(BaseModel):
     '''Customers pydantic schema'''
     
@@ -122,6 +123,7 @@ class CustomerResponse(BaseModel):
     id: uuid.UUID
     phone_number: str
     billing_address: str
+    user: UserBase
     
     class Config:
         orm_mode = True
@@ -135,5 +137,42 @@ class CreateCustomer(CustomerBase):
 
 class UpdateCustomer(CustomerBase):
     '''Schema to update a customer profile'''
+    
+    pass
+
+
+# -------------------------------------------------------
+# -------------------------------------------------------
+
+
+class SellerBase(BaseModel):
+    '''Sellers pydantic schema'''
+    
+    phone_number: str
+    address: str
+    business_name: str | None = None
+    
+
+class SellerResponse(BaseModel):
+    '''Sellers pydantic response schema'''
+    
+    id: uuid.UUID
+    address: str
+    business_name: str | None
+    business_pic: str | None
+    user: UserBase
+    
+    class Config:
+        orm_mode = True
+        
+    
+class CreateSeller(SellerBase):
+    '''Schema to create a new seller prifile'''
+    
+    pass
+
+
+class UpdateSeller(SellerBase):
+    '''Schema to update a seller profile'''
     
     pass

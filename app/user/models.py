@@ -11,8 +11,7 @@ class Role(str, Enum):
     '''Role choices for user model'''
     
     admin = 'admin'
-    employee = 'employee'
-    manager = 'manager'
+    seller = 'seller'
     customer = 'customer'
     
     
@@ -35,6 +34,7 @@ class User(Base):
     
     tokens = relationship('Token', back_populates='user')
     customer = relationship('Customer', back_populates='user', uselist=False)
+    seller = relationship('Seller', back_populates='user', uselist=False)
     
 
 class Token(Base):
@@ -44,7 +44,7 @@ class Token(Base):
     
     token = sa.Column(sa.String, unique=True, primary_key=True, nullable=False, index=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    expires = sa.Column(sa.Integer, nullable=False)
+    expires = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False)
     
     user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey(column='users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='tokens')
@@ -56,10 +56,26 @@ class Customer(Base):
     __tablename__ = 'customers'
     
     id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
-    phone_number = sa.Column(sa.String, nullable=False)
+    phone_number = sa.Column(sa.String(length=11), nullable=False)
     billing_address = sa.Column(sa.String, nullable=False)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
     user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='customer')
+    
+
+class Seller(Base):
+    '''Sellers model'''
+    
+    __tablename__ = 'sellers'
+    
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    phone_number = sa.Column(sa.String(length=11), nullable=False)
+    business_name = sa.Column(sa.String, nullable=True)
+    business_pic = sa.Column(sa.String, nullable=True)
+    address = sa.Column(sa.String, nullable=False)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    
+    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user = relationship('User', back_populates='seller')
     

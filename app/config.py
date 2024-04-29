@@ -9,40 +9,23 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 class Settings(BaseSettings):
     '''Settings configuration class'''
     
-    # debug: bool = True if os.getenv('DEBUG') == 'True' else False
-    debug: str 
+    debug: bool = True if os.getenv('DEBUG') == 'True' else False
     
-    secret_key: str
-    algorithm: str
-    access_token_expire_hours: int
+    secret_key: str = os.getenv('SECRET_KEY')
+    algorithm: str = os.getenv('ALGORITHM')
+    access_token_expire_hours: int = os.getenv('ACCESS_TOKEN_EXPIRE_HOURS')
 
-    hostname: str
-    name: str
-    user: str
-    password: str 
-    port: int
+    hostname: str = os.getenv('HOSTNAME')
+    name: str = os.getenv('DATABASE')
+    user: str= os.getenv('USER')
+    password: str= os.getenv('PASSWORD')
+    port: str= os.getenv('PORT')
 
-    my_email: str
-    my_password: str
+    my_email: str = os.getenv('MY_EMAIL')
+    my_password: str = os.getenv('MY_PASSWORD') 
     
     # In case thay are too many env variables, do this below:
-    class Config:
-        env_file = '.env'
+    # class Config:
+    #     env_file = '.env'
 
 settings = Settings()
-
-
-# debug: bool = True if os.getenv('DEBUG') == 'True' else False
-    
-#     secret_key: str = os.getenv('SECRET_KEY')
-#     algorithm: str = os.getenv('ALGORITHM')
-#     access_token_expire_hours: int = os.getenv('ACCESS_TOKEN_EXPIRE_HOURS')
-
-#     database_hostname: str = os.getenv('HOSTNAME')
-#     database_name: str = os.getenv('DATABASE')
-#     database_username: str= os.getenv('USER')
-#     database_password: str= os.getenv('PASSWORD')
-#     database_port: str= os.getenv('PORT')
-
-#     email: str = os.getenv('MY_EMAIL')
-#     passwod: str = os.getenv('MY_PASSWORD') 
