@@ -11,8 +11,8 @@ class Role(str, Enum):
     '''Role choices for user model'''
     
     admin = 'admin'
-    seller = 'seller'
     customer = 'customer'
+    seller = 'seller'
     
     
 class User(Base):
@@ -78,4 +78,5 @@ class Seller(Base):
     
     user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='seller')
+    products = relationship('Product', back_populates='seller')
     

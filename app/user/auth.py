@@ -31,7 +31,7 @@ def send_verification_mail(user: models.User):
     
     Utils.send_email({
         'subject': 'Verify your email address',
-        'body': f'Hello {user.first_name},\n\nThanks for signing up on our invoice management system. You need to verify your email address.\nClick the link below to do that:\n{url}.\nIf you did not request for this link, kindly ignore it.\n\nThank you.',
+        'body': f'Hello {user.first_name},\n\nThanks for choosing our invoice management system. You need to verify your email address.\nClick the link below to do that:\n{url}.\nIf you did not request for this link, kindly ignore it.\n\nThank you.',
         'email': user.email
     })
 
@@ -99,7 +99,7 @@ async def verify_email(request: Request, db: Session = Depends(get_db)):
     user_id = oauth2.decode_access_token(token).get('user_id')
     user = db.get(models.User, ident=user_id)
     
-    if user.is_verified:
+    if not user or user.is_verified:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Token is invalid')
     
     user.is_verified = True

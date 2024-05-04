@@ -1,6 +1,8 @@
 import uuid
 from pydantic import BaseModel
 
+from app.user import schemas
+
 class ProductBase(BaseModel):
     '''Products pydantic base schema'''
     
@@ -13,6 +15,7 @@ class ProductResponse(ProductBase):
     '''Products pydantic base response schema'''
     
     id: uuid.UUID
+    seller: schemas.SellerBase
     
     class Config:
         orm_mode = True
@@ -20,5 +23,10 @@ class ProductResponse(ProductBase):
     
 class CreateProduct(ProductBase):
     '''Schema to create a new product'''
+    
+    pass
+
+class UpdateProduct(ProductBase):
+    '''Schema to update a product'''
     
     pass

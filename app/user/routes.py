@@ -21,7 +21,7 @@ user_router = APIRouter(prefix='/user', tags=['Users'])
 def get_all_users(first_name: str = '', last_name: str = '', username: str = '', db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get users and search for users with username, first name or last name'''
     
-    permissions.is_staff(current_user)
+    permissions.is_admin(current_user)
         
     users = db.query(models.User).filter(
         models.User.username.ilike(f'%{username}%'), 
@@ -67,7 +67,7 @@ def update_user_details(user_schema: schemas.UpdateDetails, db: Session = Depend
     return user_query.first()
 
 
-@user_router.post('/email/update', status_code=status.HTTP_200_OK)
+@user_router.put('/email/update', status_code=status.HTTP_200_OK)
 def update_email(user_schema: schemas.UpdateEmail, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to update user email'''
     
@@ -83,7 +83,7 @@ def update_email(user_schema: schemas.UpdateEmail, db: Session = Depends(get_db)
     return {'message': f'Email changed successfully. Check {current_user.email} for a verification link.'}
 
 
-@user_router.post('/password/change', status_code=status.HTTP_200_OK)
+@user_router.put('/password/change', status_code=status.HTTP_200_OK)
 def change_password(user_schema: schemas.ChangePassword, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to change user password'''
     
