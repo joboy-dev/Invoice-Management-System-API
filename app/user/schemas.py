@@ -30,9 +30,9 @@ class UserResponse(BaseModel):
     last_name: str
     profile_pic: Optional[bytes]
     role: Role
-    created_at: datetime
-    is_verified: bool
-    is_active: bool
+    # created_at: datetime
+    # is_verified: bool
+    # is_active: bool
     
     class Config:
         orm_mode = True
@@ -82,12 +82,6 @@ class ChangePassword(BaseModel):
     old_password: str
     new_password: str
     password2: str
-    
-
-class UploadProfilePicture(BaseModel):
-    '''Schema to update profile picture'''
-    
-    profile_pic: Optional[bytes]
 
 
 # -------------------------------------------------------
@@ -113,6 +107,7 @@ class TokenData(BaseModel):
 class CustomerBase(BaseModel):
     '''Customers pydantic schema'''
     
+    id: uuid.UUID
     phone_number: str
     billing_address: str
     
@@ -123,7 +118,7 @@ class CustomerResponse(BaseModel):
     id: uuid.UUID
     phone_number: str
     billing_address: str
-    user: UserBase
+    user: UserResponse
     
     class Config:
         orm_mode = True
@@ -145,34 +140,35 @@ class UpdateCustomer(CustomerBase):
 # -------------------------------------------------------
 
 
-class SellerBase(BaseModel):
-    '''Sellers pydantic schema'''
+class VendorBase(BaseModel):
+    '''Vendors pydantic schema'''
     
     phone_number: str
     address: str
-    business_name: str | None = None
+    business_name: str
+    business_pic: Optional[bytes] | None = None
     
 
-class SellerResponse(BaseModel):
-    '''Sellers pydantic response schema'''
+class VendorResponse(BaseModel):
+    '''Vendors pydantic response schema'''
     
     id: uuid.UUID
     address: str
-    business_name: str | None
-    business_pic: str | None
-    user: UserBase
+    business_name: str
+    business_pic: Optional[bytes] | None
+    user: UserResponse
     
     class Config:
         orm_mode = True
         
     
-class CreateSeller(SellerBase):
-    '''Schema to create a new seller prifile'''
+class CreateVendor(VendorBase):
+    '''Schema to create a new vendor prifile'''
     
     pass
 
 
-class UpdateSeller(SellerBase):
-    '''Schema to update a seller profile'''
+class UpdateVendor(VendorBase):
+    '''Schema to update a vendor profile'''
     
     pass

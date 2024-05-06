@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     user: str= os.getenv('USER')
     password: str= os.getenv('PASSWORD')
     port: str= os.getenv('PORT')
+    
+    postgres_dev_url: str = os.getenv('POSTGRES_DEV_URL')
+    postgres_prod_url: str = os.getenv('POSTGRES_PROD_URL')
 
     my_email: str = os.getenv('MY_EMAIL')
     my_password: str = os.getenv('MY_PASSWORD') 

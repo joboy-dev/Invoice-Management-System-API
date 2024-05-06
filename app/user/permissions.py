@@ -34,13 +34,13 @@ def is_admin(user: models.User):
         raise forbidden_exception(message='Access denied as you are not an admin.')
     
     
-def is_seller(user: models.User):
+def is_vendor(user: models.User):
     '''Permission to check if the logged in user is an seller'''
     
     default_permission(user)
     
-    if not user.role == 'seller':
-        raise forbidden_exception(message='Access denied as you are not an seller.')
+    if not user.role == 'vendor':
+        raise forbidden_exception(message='Access denied as you are not a vendor.')
     
 
 def is_customer(user: models.User):

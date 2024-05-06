@@ -185,7 +185,7 @@ def create_customer_profile(customer: schemas.CreateCustomer, db: Session = Depe
     return new_customer
 
 
-@user_router.patch('/profile/customer/update', status_code=status.HTTP_201_CREATED, response_model=schemas.CustomerResponse)
+@user_router.put('/profile/customer/update', status_code=status.HTTP_201_CREATED, response_model=schemas.CustomerResponse)
 def update_customer_profile(customer_schema: schemas.UpdateCustomer, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint for user to update customer profile'''
     
@@ -203,19 +203,19 @@ def update_customer_profile(customer_schema: schemas.UpdateCustomer, db: Session
 # -----------------------------------------------------------------------------------
 
 
-@user_router.post('/profile/seller/add', status_code=status.HTTP_201_CREATED, response_model=schemas.SellerResponse)
-def create_seller_profile(seller_schema: schemas.CreateSeller, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    '''Endpoint for user to create seller profile'''
+@user_router.post('/profile/vendor/add', status_code=status.HTTP_201_CREATED, response_model=schemas.VendorResponse)
+def create_vendor_profile(vendor_schema: schemas.CreateVendor, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint for user to create vendor profile'''
     
-    permissions.is_seller(current_user)
+    permissions.is_vendor(current_user)
     
     # Check if customer profile exists
-    if db.query(models.Seller).filter(models.Seller.user_id == current_user.id).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Seller profile already exists for this user.')
+    if db.query(models.Vendor).filter(models.Vendor.user_id == current_user.id).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Vendor profile already exists for this user.')
     
-    new_seller = models.Seller(
+    new_seller = models.Vendor(
         user_id=current_user.id,
-        **seller_schema.model_dump()
+        **vendor_schema.model_dump()
     )
     
     db.add(new_seller)
@@ -225,16 +225,24 @@ def create_seller_profile(seller_schema: schemas.CreateSeller, db: Session = Dep
     return new_seller
 
 
-@user_router.patch('/profile/seller/update', status_code=status.HTTP_201_CREATED, response_model=schemas.SellerResponse)
-def update_seller_profile(seller_schema: schemas.UpdateSeller, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    '''Endpoint for user to update seller profile'''
+@user_router.put('/profile/vendor/update', status_code=status.HTTP_201_CREATED, response_model=schemas.VendorResponse)
+def update_vendor_profile(vendor_schema: schemas.UpdateVendor, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint for user to update vendor profile'''
     
-    permissions.is_seller(current_user)
+    permissions.is_vendor(current_user)
     
-    seller_query = db.query(models.Seller).filter(models.Seller.user_id == current_user.id)
+    vendor_query = db.query(models.Vendor).filter(models.Vendor.user_id == current_user.id)
     
-    seller_query.update(seller_schema.model_dump(), synchronize_session=False)
+    vendor_query.update(vendor_schema.model_dump(), synchronize_session=False)
     db.commit()
     
-    return seller_query.first()
+    return vendor_query.first()
+
+
+@user_router.put('/profile/vendor/business-pic/update', status_code=status.HTTP_201_CREATED)
+async def update_vendor_picture(file: UploadFile, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint to update vendor picture'''
+    
+    permissions.is_vendor(current_user)
+    
     

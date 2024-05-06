@@ -1,4 +1,3 @@
-import uuid
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
@@ -29,11 +28,11 @@ def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(
     user_permissions.is_staff(current_user)
     
     # get seller based on current logged in user
-    seller = db.query(user_models.Seller).filter(user_models.Seller.user_id == current_user.id).first()
+    vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
     
     new_product = models.Product(
         **product_schema.model_dump(),
-        seller_id=seller.id
+        vendor_id=vendor.id
     )
     
     db.add(new_product)
@@ -64,9 +63,8 @@ def update_product(id, product_schema: schemas.UpdateProduct, db: Session = Depe
     product_query = db.query(models.Product).filter(models.Product.id == id)
     
     product = product_query.first()
-    seller = db.query(user_models.Seller).filter(user_models.Seller.user_id == current_user.id).first()
-    
-    product_permissions.is_product_owner(seller, product)
+    vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
+    product_permissions.is_product_vendor(vendor, product)
     
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='This product does not exist')
@@ -84,9 +82,8 @@ def delete_product(id, db: Session = Depends(get_db), current_user: user_models.
     user_permissions.is_staff(current_user)
     
     product = db.get(models.Product, ident=id)
-    seller = db.query(user_models.Seller).filter(user_models.Seller.user_id == current_user.id).first()
-    
-    product_permissions.is_product_owner(seller, product)
+    vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
+    product_permissions.is_product_vendor(vendor, product)
     
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='This product does not exist')

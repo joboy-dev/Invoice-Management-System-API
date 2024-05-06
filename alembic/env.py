@@ -7,13 +7,14 @@ from alembic import context
 
 from app.user.models import Base
 from app.product.models import Base
-# from app.invoice.models import Base
+from app.invoice.models import Base
 
 from app.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
 config.set_main_option('sqlalchemy.url', f"postgresql://{settings.user}:{settings.password}@{settings.hostname}:{settings.port}/{settings.name}")
 
 # Interpret the config file for Python logging.

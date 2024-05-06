@@ -56,7 +56,7 @@ async def register(user: schemas.CreateUser, db: Session = Depends(get_db)):
     # Password validation
     if user.password != user.password2:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Passwords do not match')
-    
+        
     if not Utils.is_valid_password(password=user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
