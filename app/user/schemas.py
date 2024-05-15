@@ -127,13 +127,15 @@ class CustomerResponse(BaseModel):
 class CreateCustomer(CustomerBase):
     '''Schema to create a new customer'''
     
-    pass
+    phone_number: str
+    billing_address: str
 
 
 class UpdateCustomer(CustomerBase):
     '''Schema to update a customer profile'''
     
-    pass
+    phone_number: str
+    billing_address: str
 
 
 # -------------------------------------------------------
@@ -143,6 +145,7 @@ class UpdateCustomer(CustomerBase):
 class VendorBase(BaseModel):
     '''Vendors pydantic schema'''
     
+    id: uuid.UUID
     phone_number: str
     address: str
     business_name: str
@@ -165,10 +168,16 @@ class VendorResponse(BaseModel):
 class CreateVendor(VendorBase):
     '''Schema to create a new vendor prifile'''
     
-    pass
+    phone_number: str
+    address: str
+    business_name: str
+    business_pic: Optional[bytes] | None = None
 
 
 class UpdateVendor(VendorBase):
     '''Schema to update a vendor profile'''
     
-    pass
+    phone_number: str
+    address: str
+    business_name: str
+    business_pic: Optional[bytes] | None = None

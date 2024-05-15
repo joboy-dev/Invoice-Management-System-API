@@ -1,7 +1,4 @@
-from datetime import datetime
-import uuid
 from uuid import uuid4
-from pydantic import BaseModel
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship

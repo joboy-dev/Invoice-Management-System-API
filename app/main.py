@@ -5,6 +5,9 @@ from .user.routes import user_router
 from .user.auth import auth_router
 from .product.routes import product_router
 from .invoice.routes import invoice_router
+from .admin.user import admin_user_router
+from .admin.product import admin_product_router
+from .admin.invoice import admin_invoice_router
 
 # --------------------------------------------------------------
 # App configurations
@@ -40,3 +43,6 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(product_router)
 app.include_router(invoice_router)
+app.include_router(admin_user_router)
+app.include_router(admin_product_router)
+app.include_router(admin_invoice_router)

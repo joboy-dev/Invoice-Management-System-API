@@ -17,21 +17,6 @@ from .utils import Utils
 
 user_router = APIRouter(prefix='/user', tags=['Users'])
 
-@user_router.get('', status_code=status.HTTP_200_OK, response_model=List[schemas.UserResponse])
-def get_all_users(first_name: str = '', last_name: str = '', username: str = '', db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    '''Endpoint to get users and search for users with username, first name or last name'''
-    
-    permissions.is_admin(current_user)
-        
-    users = db.query(models.User).filter(
-        models.User.username.ilike(f'%{username}%'), 
-        models.User.first_name.ilike(f'%{first_name}%'), 
-        models.User.last_name.ilike(f'%{last_name}%')
-    )
-    
-    return users
-
-
 @user_router.get('/profile', status_code=status.HTTP_200_OK, response_model=schemas.UserResponse)
 def get_user_details(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get logged in user details'''
@@ -213,16 +198,16 @@ def create_vendor_profile(vendor_schema: schemas.CreateVendor, db: Session = Dep
     if db.query(models.Vendor).filter(models.Vendor.user_id == current_user.id).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Vendor profile already exists for this user.')
     
-    new_seller = models.Vendor(
+    new_vendor = models.Vendor(
         user_id=current_user.id,
         **vendor_schema.model_dump()
     )
     
-    db.add(new_seller)
+    db.add(new_vendor)
     db.commit()
-    db.refresh(new_seller)
+    db.refresh(new_vendor)
     
-    return new_seller
+    return new_vendor
 
 
 @user_router.put('/profile/vendor/update', status_code=status.HTTP_201_CREATED, response_model=schemas.VendorResponse)

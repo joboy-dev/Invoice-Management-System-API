@@ -15,7 +15,7 @@ class ProductResponse(ProductBase):
     '''Products pydantic base response schema'''
     
     id: uuid.UUID
-    seller: schemas.VendorBase
+    vendor: schemas.VendorBase
     
     class Config:
         orm_mode = True

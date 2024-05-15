@@ -80,4 +80,5 @@ class Vendor(Base):
     user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='vendor')
     products = relationship('Product', back_populates='vendor')
+    invoices = relationship('Invoice', back_populates='vendor')
     

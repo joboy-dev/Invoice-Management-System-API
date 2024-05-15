@@ -12,11 +12,18 @@ from . import permissions as product_permissions
 product_router = APIRouter(prefix='/products', tags=['Products'])
 
 @product_router.get('', status_code=status.HTTP_200_OK, response_model=List[schemas.ProductResponse])
-def get_all_products(name: str = '', limit: int = 10, skip: int = 0, db: Session = Depends(get_db)):
-    '''Endpoint to get all products and search for a product by name'''   
+def get_vendor_products(name: str = '', limit: int = 10, skip: int = 0, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint to get all products for a vendor and search for a product by name'''
+    
+    user_permissions.is_vendor(current_user)
+    
+    vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
     
     # Search functionality
-    products = db.query(models.Product).filter(models.Product.name.ilike(f'%{name}%')).limit(limit).offset(skip).all()
+    products = db.query(models.Product).filter(
+        models.Product.vendor_id == vendor.id,
+        models.Product.name.ilike(f'%{name}%')
+    ).limit(limit).offset(skip).all()
     
     return products
 
@@ -25,7 +32,7 @@ def get_all_products(name: str = '', limit: int = 10, skip: int = 0, db: Session
 def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to create a new product'''
     
-    user_permissions.is_staff(current_user)
+    user_permissions.is_vendor(current_user)
     
     # get seller based on current logged in user
     vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
@@ -42,32 +49,36 @@ def create_product(product_schema: schemas.CreateProduct, db: Session = Depends(
     return new_product
 
 
-@product_router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
+@product_router.get('/{id}/fetch', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
 def get_product_by_id(id, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get a specific product'''
     
     product = db.get(models.Product, ident=id)
+    vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
     
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='This product does not exist')
     
+    product_permissions.is_product_vendor(vendor, product)
+    
     return product
 
 
-@product_router.patch('/{id}/update', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
+@product_router.put('/{id}/update', status_code=status.HTTP_200_OK, response_model=schemas.ProductResponse)
 def update_product(id, product_schema: schemas.UpdateProduct, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to update a specific product'''   
     
-    user_permissions.is_staff(current_user)
+    user_permissions.is_vendor(current_user)
     
     product_query = db.query(models.Product).filter(models.Product.id == id)
     
     product = product_query.first()
     vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
-    product_permissions.is_product_vendor(vendor, product)
     
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='This product does not exist')
+    
+    product_permissions.is_product_vendor(vendor, product)
     
     product_query.update(product_schema.model_dump(), synchronize_session=False) 
     db.commit()
@@ -79,14 +90,15 @@ def update_product(id, product_schema: schemas.UpdateProduct, db: Session = Depe
 def delete_product(id, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to delete a specific product''' 
     
-    user_permissions.is_staff(current_user)
+    user_permissions.is_vendor(current_user)
     
     product = db.get(models.Product, ident=id)
     vendor = db.query(user_models.Vendor).filter(user_models.Vendor.user_id == current_user.id).first()
-    product_permissions.is_product_vendor(vendor, product)
     
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='This product does not exist')
+    
+    product_permissions.is_product_vendor(vendor, product)
     
     db.delete(product)
     db.commit()

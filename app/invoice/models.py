@@ -29,9 +29,13 @@ class Invoice(Base):
     invoice_date = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     status = sa.Column(sa.Enum(Status), nullable=False, server_default=Status.draft.value)
     due_date = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False)
+    total = sa.Column(sa.Numeric(10, 2), nullable=False, server_default='0.00')
     
     customer_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('customers.id', ondelete='CASCADE'), nullable=False)
     customer = relationship('Customer', back_populates='invoices')
+    
+    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'), nullable=False)
+    vendor = relationship('Vendor', back_populates='invoices')
     
     invoice_items = relationship('InvoiceItem', back_populates='invoice')
 

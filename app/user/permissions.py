@@ -15,24 +15,6 @@ def default_permission(user: models.User):
     if not user.is_verified:
         raise forbidden_exception(message='Access denied as you are not a verified user. Verify your email address.')
     
-
-def is_staff(user: models.User):
-    '''Permission to check if the logged in user is an employee, manager, or admin'''
-    
-    default_permission(user)
-    
-    if not (user.role == 'seller' or user.role == 'admin'):
-        raise forbidden_exception(message='Access denied as you are not a staff member.')
-    
-    
-def is_admin(user: models.User):
-    '''Permission to check if the logged in user is an admin'''
-    
-    default_permission(user)
-    
-    if not user.role == 'admin':
-        raise forbidden_exception(message='Access denied as you are not an admin.')
-    
     
 def is_vendor(user: models.User):
     '''Permission to check if the logged in user is an seller'''
