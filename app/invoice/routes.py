@@ -101,7 +101,7 @@ def get_invoice_by_id(id: uuid.UUID, db: Session = Depends(get_db), current_user
 
 
 @invoice_router.put('/{id}/status/update', status_code=status.HTTP_200_OK, response_model=schemas.InvoiceResponse)
-def update_invoice_status(id: uuid.UUID, schemaa: schemas.UpdateInvoiceStatus, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_invoice_status(id: uuid.UUID, schema: schemas.UpdateInvoiceStatus, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     '''Endpoint to get a simgle invoice by id'''
     
     user_permissions.is_vendor(current_user)
@@ -114,7 +114,10 @@ def update_invoice_status(id: uuid.UUID, schemaa: schemas.UpdateInvoiceStatus, d
     
     permissions.is_invoice_vendor(vendor, invoice)
     
-    invoice.status = schemaa.status
+    if schema.status == 'draft':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invoice cannot be updated to a draft.')
+
+    invoice.status = schema.status
     db.commit()
     
     return invoice
