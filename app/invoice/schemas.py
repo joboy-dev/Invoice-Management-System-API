@@ -64,7 +64,7 @@ class InvoiceResponse(InvoiceBase):
     id: uuid.UUID
     customer: user_schemas.CustomerResponse
     vendor: user_schemas.VendorBase
-    items: List[InvoiceItemResponse]
+    items: List[InvoiceItemResponse] = []
     total: float
     
     class Config:
