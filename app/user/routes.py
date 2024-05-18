@@ -6,6 +6,7 @@ from secrets import token_hex
 from fastapi import APIRouter, UploadFile, File, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 
+from app import utils as app_utils
 from app.user import auth
 from app.database import get_db
 
@@ -94,40 +95,21 @@ def change_password(user_schema: schemas.ChangePassword, db: Session = Depends(g
 
 
 @user_router.put('/profile-picture/update', status_code=status.HTTP_200_OK)
-async def update_profile_picture(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+async def update_profile_picture(profile_pic: UploadFile = File(...), db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to upload user picture'''
     
     permissions.default_permission(current_user)
     
-    # Check against invalid extensions
-    file_name = file.filename.lower()
-    file_extension = file_name.split('.')[-1]
-    
-    if file_extension not in ['jpg', 'jpeg', 'jfif', 'png']:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid file format')
-    
-    # Create file storage path
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent
-    UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads', 'user')
-    
-    if not os.path.exists(UPLOAD_DIR):
-        os.mkdir(UPLOAD_DIR)
-    
-    # Generate a new file name
-    new_filename = f'user_pic-{current_user.id}-{token_hex(5)}.jpg'
-    SAVE_FILE_DIR = os.path.join(UPLOAD_DIR, new_filename)
-    
-    with open(SAVE_FILE_DIR, 'wb') as f:
-        content = await file.read()
-        f.write(content)
+    file_data = await app_utils.upload_file(
+        file=profile_pic,
+        allowed_extensions=['jpg', 'jpeg', 'png', 'jfif'],
+        upload_folder='user',
+        new_filename=f'user_pic-{current_user.id}-{token_hex(5)}.jpg'
+    )
         
     # TODO: Upload file to database
     
-    
-    return {
-        'filename': new_filename,
-        'filepath': SAVE_FILE_DIR
-    }
+    return file_data
 
 
 @user_router.delete('/delete', status_code=status.HTTP_200_OK)
@@ -170,6 +152,17 @@ def create_customer_profile(customer: schemas.CreateCustomer, db: Session = Depe
     return new_customer
 
 
+@user_router.post('/profile/customer/fetch', status_code=status.HTTP_200_OK, response_model=schemas.CustomerResponse)
+def get_customer_profile(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint to get current logged in user customer profile'''
+    
+    permissions.is_customer(current_user)
+    
+    customer = db.query(models.Customer).filter(models.Customer.user_id == current_user.id).first()
+    
+    return customer
+
+
 @user_router.put('/profile/customer/update', status_code=status.HTTP_201_CREATED, response_model=schemas.CustomerResponse)
 def update_customer_profile(customer_schema: schemas.UpdateCustomer, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint for user to update customer profile'''
@@ -210,6 +203,17 @@ def create_vendor_profile(vendor_schema: schemas.CreateVendor, db: Session = Dep
     return new_vendor
 
 
+@user_router.post('/profile/vendor/fetch', status_code=status.HTTP_201_CREATED, response_model=schemas.VendorResponse)
+def get_vendor_profile(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    '''Endpoint to get current user vendor profile'''
+    
+    permissions.is_vendor(current_user)
+    
+    vendor = db.query(models.Vendor).filter(models.Vendor.user_id == current_user.id).first()
+    
+    return vendor
+
+
 @user_router.put('/profile/vendor/update', status_code=status.HTTP_201_CREATED, response_model=schemas.VendorResponse)
 def update_vendor_profile(vendor_schema: schemas.UpdateVendor, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint for user to update vendor profile'''
@@ -225,9 +229,19 @@ def update_vendor_profile(vendor_schema: schemas.UpdateVendor, db: Session = Dep
 
 
 @user_router.put('/profile/vendor/business-pic/update', status_code=status.HTTP_201_CREATED)
-async def update_vendor_picture(file: UploadFile, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+async def update_vendor_picture(business_pic: UploadFile, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to update vendor picture'''
     
     permissions.is_vendor(current_user)
     
+    file_data = await app_utils.upload_file(
+        file=business_pic,
+        allowed_extensions=['jpg', 'jpeg', 'png', 'jfif'],
+        upload_folder='vendor',
+        new_filename=f'vendor_pic-{current_user.id}-{token_hex(5)}.jpg'
+    )
+        
+    # TODO: Upload file to database
+    
+    return file_data
     

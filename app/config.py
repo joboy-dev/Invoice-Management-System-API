@@ -1,31 +1,27 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+from app.utils import get_value_from_env
 
 class Settings(BaseSettings):
     '''Settings configuration class'''
     
-    debug: bool = True if os.getenv('DEBUG') == 'True' else False
+    debug: bool = True if get_value_from_env('DEBUG') == 'True' else False
     
-    secret_key: str = os.getenv('SECRET_KEY')
-    algorithm: str = os.getenv('ALGORITHM')
-    access_token_expire_hours: int = os.getenv('ACCESS_TOKEN_EXPIRE_HOURS')
+    secret_key: str = get_value_from_env('SECRET_KEY')
+    algorithm: str = get_value_from_env('ALGORITHM')
+    access_token_expire_hours: int = get_value_from_env('ACCESS_TOKEN_EXPIRE_HOURS')
 
-    hostname: str = os.getenv('HOSTNAME')
-    name: str = os.getenv('DATABASE')
-    user: str= os.getenv('USER')
-    password: str= os.getenv('PASSWORD')
-    port: str= os.getenv('PORT')
+    hostname: str = get_value_from_env('HOSTNAME')
+    name: str = get_value_from_env('DATABASE')
+    user: str= get_value_from_env('USER')
+    password: str= get_value_from_env('PASSWORD')
+    port: str= get_value_from_env('PORT')
     
-    postgres_dev_url: str = os.getenv('POSTGRES_DEV_URL')
-    postgres_prod_url: str = os.getenv('POSTGRES_PROD_URL')
+    postgres_dev_url: str = get_value_from_env('POSTGRES_DEV_URL')
+    postgres_prod_url: str = get_value_from_env('POSTGRES_PROD_URL')
 
-    my_email: str = os.getenv('MY_EMAIL')
-    my_password: str = os.getenv('MY_PASSWORD') 
+    my_email: str = get_value_from_env('MY_EMAIL')
+    my_password: str = get_value_from_env('MY_PASSWORD') 
     
     # In case thay are too many env variables, do this below:
     # class Config:

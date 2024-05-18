@@ -41,6 +41,27 @@ class InvoiceItemResponse(BaseModel):
     
     class Config:
         orm_mode=True
+        
+
+class UpdateInvoiceItem(BaseModel):
+    '''Invoice item update schema'''
+    
+    description: str
+    quantity: int = 1
+    unit_price: float
+    tax: float | None = 0.0
+    discount: float | None = 0.0
+    additional_charges: float | None = 0.0
+    
+    @property
+    def total_price_before_tax(self) -> float:
+        return self.quantity * self.unit_price
+
+    def total_price(self) -> float:
+        total_before_tax = self.total_price_before_tax
+        tax_amount = total_before_tax * (self.tax or 0.0)
+        discount_amount = total_before_tax * (self.discount or 0.0)
+        return total_before_tax + tax_amount - discount_amount + (self.additional_charges or 0.0)
     
 
 # ----------------------------------------------------------------------
@@ -48,7 +69,6 @@ class InvoiceItemResponse(BaseModel):
 # ---------------------------------------------------------------------- 
     
     
-
 class InvoiceBase(BaseModel):
     '''Invoice pydantic base model'''
     
