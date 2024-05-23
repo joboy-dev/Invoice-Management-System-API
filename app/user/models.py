@@ -60,7 +60,7 @@ class Customer(Base):
     billing_address = sa.Column(sa.String, nullable=False)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
-    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     user = relationship('User', back_populates='customer')
     invoices = relationship('Invoice', back_populates='customer')
     
@@ -77,7 +77,7 @@ class Vendor(Base):
     address = sa.Column(sa.String, nullable=False)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
-    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     user = relationship('User', back_populates='vendor')
     products = relationship('Product', back_populates='vendor')
     invoices = relationship('Invoice', back_populates='vendor')

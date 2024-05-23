@@ -16,7 +16,7 @@ class Product(Base):
     unit_price = sa.Column(sa.Float, nullable=False, server_default='0.00')
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
-    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'))
+    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'), nullable=True)
     vendor = relationship('Vendor', back_populates='products')
     invoice_item = relationship('InvoiceItem', back_populates='product')
     

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List
 
 from app.user import schemas as user_schemas
+from app.product import schemas as product_schemas
 from app.invoice.models import Status
 
 class InvoiceItemBase(BaseModel):
@@ -11,20 +12,9 @@ class InvoiceItemBase(BaseModel):
     
     description: str
     quantity: int = 1
-    unit_price: float
     tax: float | None = 0.0
     discount: float | None = 0.0
     additional_charges: float | None = 0.0
-    
-    @property
-    def total_price_before_tax(self) -> float:
-        return self.quantity * self.unit_price
-
-    def total_price(self) -> float:
-        total_before_tax = self.total_price_before_tax
-        tax_amount = total_before_tax * (self.tax or 0.0)
-        discount_amount = total_before_tax * (self.discount or 0.0)
-        return total_before_tax + tax_amount - discount_amount + (self.additional_charges or 0.0)
     
 
 class InvoiceItemResponse(BaseModel):
@@ -38,6 +28,7 @@ class InvoiceItemResponse(BaseModel):
     discount: float | None
     additional_charges: float | None
     total_price: float
+    product: product_schemas.ProductResponse
     
     class Config:
         orm_mode=True
@@ -48,20 +39,9 @@ class UpdateInvoiceItem(BaseModel):
     
     description: str
     quantity: int = 1
-    unit_price: float
     tax: float | None = 0.0
     discount: float | None = 0.0
     additional_charges: float | None = 0.0
-    
-    @property
-    def total_price_before_tax(self) -> float:
-        return self.quantity * self.unit_price
-
-    def total_price(self) -> float:
-        total_before_tax = self.total_price_before_tax
-        tax_amount = total_before_tax * (self.tax or 0.0)
-        discount_amount = total_before_tax * (self.discount or 0.0)
-        return total_before_tax + tax_amount - discount_amount + (self.additional_charges or 0.0)
     
 
 # ----------------------------------------------------------------------
@@ -84,7 +64,7 @@ class InvoiceResponse(InvoiceBase):
     id: uuid.UUID
     customer: user_schemas.CustomerResponse
     vendor: user_schemas.VendorBase
-    items: List[InvoiceItemResponse] = []
+    invoice_items: List[InvoiceItemResponse]
     total: float
     
     class Config:

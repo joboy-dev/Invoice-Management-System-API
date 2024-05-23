@@ -8,6 +8,7 @@ from alembic import context
 from app.user.models import Base
 from app.product.models import Base
 from app.invoice.models import Base
+from app.payment.models import Base
 
 from app.config import settings
 

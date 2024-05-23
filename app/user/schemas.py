@@ -149,7 +149,7 @@ class VendorBase(BaseModel):
     phone_number: str
     address: str
     business_name: str
-    business_pic: Optional[bytes] | None = None
+    # business_pic: Optional[bytes] | None = None
     
 
 class VendorResponse(BaseModel):

@@ -1,8 +1,3 @@
-import os
-from pathlib import Path
-from typing import List
-from secrets import token_hex
-
 from fastapi import APIRouter, UploadFile, File, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 
@@ -104,10 +99,12 @@ async def update_profile_picture(profile_pic: UploadFile = File(...), db: Sessio
         file=profile_pic,
         allowed_extensions=['jpg', 'jpeg', 'png', 'jfif'],
         upload_folder='user',
-        new_filename=f'user_pic-{current_user.id}-{token_hex(5)}.jpg'
+        model_id=current_user.id
     )
         
-    # TODO: Upload file to database
+    # Upload download url to database
+    current_user.profile_pic = file_data['download_url']
+    db.commit()
     
     return file_data
 
@@ -234,14 +231,18 @@ async def update_vendor_picture(business_pic: UploadFile, db: Session = Depends(
     
     permissions.is_vendor(current_user)
     
+    vendor = db.query(models.Vendor).filter(models.Vendor.user_id == current_user.id).first()
+    
     file_data = await app_utils.upload_file(
         file=business_pic,
         allowed_extensions=['jpg', 'jpeg', 'png', 'jfif'],
         upload_folder='vendor',
-        new_filename=f'vendor_pic-{current_user.id}-{token_hex(5)}.jpg'
+        model_id=vendor.id
     )
         
-    # TODO: Upload file to database
+    # Upload download url to database
+    vendor.business_pic = file_data['download_url']
+    db.commit()
     
     return file_data
     

@@ -17,6 +17,14 @@ from . import permissions
 
 invoice_router = APIRouter(prefix='/invoices', tags=['Invoice'])
 
+def total_price(schema_obj, product_obj: Product):
+    total_before_tax = schema_obj.quantity * product_obj.unit_price
+    tax_amount = total_before_tax * (schema_obj.tax or 0.0)
+    discount_amount = total_before_tax * (schema_obj.discount or 0.0)
+    
+    total_price = total_before_tax + tax_amount - discount_amount + (schema_obj.additional_charges or 0.0)
+    return total_price
+
 @invoice_router.get('', status_code=status.HTTP_200_OK, response_model=List[schemas.InvoiceResponse])
 def get_vendor_invoices(filter: str = '', db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     '''Endpoint to get all invoices for current logged in vendor and filter them by draft, pending, paid, overdue'''
@@ -157,10 +165,12 @@ def add_item_to_invoice(invoice_id: uuid.UUID, product_id: uuid.UUID, schema: sc
     if invoice_item:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This product is already on this invoice')
     
+    final_total = total_price(schema_obj=schema, product_obj=product)
     # Create new invoice item object
     item = models.InvoiceItem(
         **schema.model_dump(),
-        total_price=schema.total_price(),
+        unit_price=product.unit_price,
+        total_price=final_total,
         invoice_id=invoice_id,
         product_id=product_id,
     )
@@ -168,7 +178,7 @@ def add_item_to_invoice(invoice_id: uuid.UUID, product_id: uuid.UUID, schema: sc
     db.add(item)
     
     # Update the toal price of the invoice
-    invoice.total += Decimal(schema.total_price())
+    invoice.total += Decimal(final_total)
     
     db.commit()
     db.refresh(item)
@@ -266,10 +276,11 @@ def update_item_in_invoice(invoice_item_id: uuid.UUID, schema: schemas.UpdateInv
     
     invoice_item_query.update(schema.model_dump(), synchronize_session=False)
     
+    final_total = total_price(schema_obj=schema, product_obj=invoice_item.product)
     # Update the invoice item total price
-    invoice_item.total_price = schema.total_price()
+    invoice_item.total_price = final_total
     # Add the updated price back to invoice total
-    invoice.total += Decimal(schema.total_price())
+    invoice.total += Decimal(final_total)
     
     db.commit()
     

@@ -31,13 +31,14 @@ class Invoice(Base):
     due_date = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False)
     total = sa.Column(sa.Numeric(10, 2), nullable=False, server_default='0.00')
     
-    customer_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('customers.id', ondelete='CASCADE'), nullable=False)
+    customer_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('customers.id', ondelete='CASCADE'), nullable=True)
     customer = relationship('Customer', back_populates='invoices')
     
-    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'), nullable=False)
+    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'), nullable=True)
     vendor = relationship('Vendor', back_populates='invoices')
     
-    invoice_items = relationship('InvoiceItem', back_populates='invoice')
+    invoice_items = relationship('InvoiceItem', back_populates='invoice', lazy='joined')
+    payment = relationship('Payment', back_populates='invoice')
 
 
 class InvoiceItem(Base):
@@ -54,9 +55,9 @@ class InvoiceItem(Base):
     additional_charges = sa.Column(sa.Numeric(10, 2), nullable=False, server_default='0.00')
     total_price = sa.Column(sa.Numeric(10, 2), nullable=False)
 
-    invoice_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('invoices.id', ondelete='CASCADE'), nullable=False)
+    invoice_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('invoices.id', ondelete='CASCADE'), nullable=True)
     invoice = relationship("Invoice", back_populates="invoice_items")
     
-    product_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    product_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('products.id', ondelete='CASCADE'), nullable=True)
     product = relationship("Product", back_populates="invoice_item")
     

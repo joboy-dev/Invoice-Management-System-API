@@ -11,5 +11,11 @@ class Payment(Base):
     
     __tablename__ = 'payments'
     
+    id = sa.Column(sa.UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
+    amount_paid = sa.Column(sa.Numeric(10, 2), nullable=False, server_default='0.00')
+    payment_date = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    
+    invoice_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('invoices.id', ondelete='CASCADE'), nullable=False)
+    invoice = relationship('Invoice', back_populates='payment')
     
     
