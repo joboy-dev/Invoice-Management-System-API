@@ -63,6 +63,7 @@ class Customer(Base):
     user_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     user = relationship('User', back_populates='customer')
     invoices = relationship('Invoice', back_populates='customer')
+    payments = relationship('Payment', back_populates='customer')
     
 
 class Vendor(Base):
@@ -81,4 +82,6 @@ class Vendor(Base):
     user = relationship('User', back_populates='vendor')
     products = relationship('Product', back_populates='vendor')
     invoices = relationship('Invoice', back_populates='vendor')
+    payments = relationship('Payment', back_populates='customer')
+    
     

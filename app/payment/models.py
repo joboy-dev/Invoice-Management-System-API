@@ -18,4 +18,10 @@ class Payment(Base):
     invoice_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('invoices.id', ondelete='CASCADE'), nullable=False)
     invoice = relationship('Invoice', back_populates='payment')
     
+    customer_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('customers.id', ondelete='CASCADE'), nullable=False)
+    customer = relationship('Customer', back_populates='payments')
+    
+    vendor_id = sa.Column(sa.UUID(as_uuid=True), sa.ForeignKey('vendors.id', ondelete='CASCADE'), nullable=False)
+    vendor = relationship('Vendor', back_populates='payments')
+    
     

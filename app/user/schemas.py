@@ -14,7 +14,7 @@ class UserBase(BaseModel):
     password2: str
     first_name: str
     last_name: str
-    profile_pic: Optional[bytes]
+    profile_pic: str
     role: Role = Role.customer
     is_verified: bool = False
     is_active: bool = True
@@ -28,7 +28,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
-    profile_pic: Optional[bytes]
+    profile_pic: str
     role: Role
     # created_at: datetime
     # is_verified: bool
@@ -149,7 +149,7 @@ class VendorBase(BaseModel):
     phone_number: str
     address: str
     business_name: str
-    # business_pic: Optional[bytes] | None = None
+    business_pic: str
     
 
 class VendorResponse(BaseModel):
@@ -158,7 +158,7 @@ class VendorResponse(BaseModel):
     id: uuid.UUID
     address: str
     business_name: str
-    business_pic: Optional[bytes] | None
+    business_pic: str
     user: UserResponse
     
     class Config:

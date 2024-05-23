@@ -99,6 +99,8 @@ def issue_invoice(customer_id: uuid.UUID, invoice_schema: schemas.IssueInvoice, 
 def get_invoice_by_id(id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     '''Endpoint to get a simgle invoice by id'''
     
+    user_permissions.default_permission(current_user)
+    
     invoice = db.get(models.Invoice, ident=id)
     
     if invoice is None: 
