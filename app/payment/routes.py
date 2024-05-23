@@ -85,7 +85,3 @@ def get_payment_by_id(id: UUID, db: Session = Depends(get_db), current_user: use
     
     return payment
     
-    
-    
-    
-    
