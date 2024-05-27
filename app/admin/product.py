@@ -26,14 +26,13 @@ def get_vendor_products(name: str = '', limit: int = 20, skip: int = 0, db: Sess
 
 
 @admin_product_router.post('/create', status_code=status.HTTP_201_CREATED, response_model=product_schemas.ProductResponse)
-def create_product(product_schema: product_schemas.CreateProduct, vendor_id: uuid.UUID | None,  db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
+def create_product(product_schema: schemas.AdminProductBase, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to create a new product'''
     
     permissions.is_admin(current_user)
     
     new_product = product_models.Product(
-        **product_schema.model_dump(),
-        vendor_id=vendor_id if vendor_id is not None else None
+        **product_schema.model_dump()
     )
     
     db.add(new_product)

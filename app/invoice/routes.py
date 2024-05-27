@@ -25,6 +25,7 @@ def total_price(schema_obj, product_obj: Product):
     total_price = total_before_tax + tax_amount - discount_amount + (schema_obj.additional_charges or 0.0)
     return total_price
 
+
 @invoice_router.get('', status_code=status.HTTP_200_OK, response_model=List[schemas.InvoiceResponse])
 def get_vendor_invoices(filter: str = '', db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     '''Endpoint to get all invoices for current logged in vendor and filter them by draft, pending, paid, overdue'''
@@ -188,44 +189,72 @@ def add_item_to_invoice(invoice_id: uuid.UUID, product_id: uuid.UUID, schema: sc
     return item
 
 
-@invoice_router.delete('/{invoice_id}/product/{product_id}/remove', status_code=status.HTTP_204_NO_CONTENT)
-def remove_item_from_invoice(invoice_id: uuid.UUID, product_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+# @invoice_router.delete('/{invoice_id}/product/{product_id}/remove', status_code=status.HTTP_204_NO_CONTENT)
+# def remove_item_from_invoice(invoice_id: uuid.UUID, product_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+#     '''Endpoint to remove an item(product) from an invoice'''
+    
+#     user_permissions.is_vendor(current_user)
+    
+#     vendor = db.query(Vendor).filter(Vendor.user_id == current_user.id).first()
+    
+#     # Check if logged in user is the vender of the invoice or the product
+#     invoice_query = db.query(models.Invoice).filter(
+#         models.Invoice.id == invoice_id,
+#         models.Invoice.vendor_id == vendor.id
+#     )
+#     invoice = invoice_query.first()
+    
+#     product = db.query(Product).filter(
+#         Product.id == product_id,
+#         Product.vendor_id == vendor.id
+#     ).first()
+    
+#     if invoice is None:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invoice not found')
+    
+#     if product is None:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
+    
+#     invoice_item_query = db.query(models.InvoiceItem).filter(
+#         models.InvoiceItem.invoice_id == invoice_id,
+#         models.InvoiceItem.product_id == product_id
+#     )
+    
+#     # Check if invoice item doesn't exists for the invoice
+#     invoice_item = invoice_item_query.first()
+    
+#     if not invoice_item:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This product does not exist on this invoice')
+    
+#     invoice_item_query.delete(synchronize_session=False)
+    
+#     # Update the toal price of the invoice
+#     invoice.total -= invoice_item.total_price
+    
+#     db.commit()
+
+
+@invoice_router.delete('/item/{invoice_item_id}/remove', status_code=status.HTTP_204_NO_CONTENT)
+def remove_item_from_invoice(invoice_item_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     '''Endpoint to remove an item(product) from an invoice'''
     
     user_permissions.is_vendor(current_user)
     
-    vendor = db.query(Vendor).filter(Vendor.user_id == current_user.id).first()
-    
-    # Check if logged in user is the vender of the invoice or the product
-    invoice_query = db.query(models.Invoice).filter(
-        models.Invoice.id == invoice_id,
-        models.Invoice.vendor_id == vendor.id
-    )
-    invoice = invoice_query.first()
-    
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.vendor_id == vendor.id
-    ).first()
-    
-    if invoice is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invoice not found')
-    
-    if product is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
-    
-    invoice_item_query = db.query(models.InvoiceItem).filter(
-        models.InvoiceItem.invoice_id == invoice_id,
-        models.InvoiceItem.product_id == product_id
-    )
-    
-    # Check if invoice item doesn't exists for the invoice
-    invoice_item = invoice_item_query.first()
+    invoice_item = db.get(models.InvoiceItem, ident=invoice_item_id)
     
     if not invoice_item:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This product does not exist on this invoice')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invoice item does not exist')
     
-    invoice_item_query.delete(synchronize_session=False)
+    product = db.get(Product, ident=invoice_item.product_id)
+    invoice = db.get(models.Invoice, ident=invoice_item.invoice_id)
+    
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product does not exist')
+    
+    if not invoice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invoice does not exist')
+    
+    db.delete(invoice_item)
     
     # Update the toal price of the invoice
     invoice.total -= invoice_item.total_price
