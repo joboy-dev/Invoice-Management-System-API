@@ -11,13 +11,17 @@ class PaymentBase(BaseModel):
     id: uuid.UUID
     amount_paid: float
     payment_date: datetime
-    invoice: invoice_schemas.InvoiceBase
-    customer: user_schemas.CustomerBase
-    vendor: user_schemas.VendorBase
+    # invoice: invoice_schemas.InvoiceBase
+    # customer: user_schemas.CustomerBase
+    # vendor: user_schemas.VendorBase
     
 
 class PaymentResponse(PaymentBase):
     '''Payment pydantic base model'''
+    
+    invoice: invoice_schemas.InvoiceBase
+    customer: user_schemas.CustomerBase
+    vendor: user_schemas.VendorBase
     
     class Config:
         orm_mode = True

@@ -27,6 +27,9 @@ def process_payment_for_invoice(invoice_id: UUID, db: Session = Depends(get_db),
     if invoice is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invoice not found')
     
+    if invoice.status in ['draft', 'paid']:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Cannot pay for this invoice. It is either a draft invoice or is already paid for.')
+    
     # TODO: Process test payment with paystack. Ensure to catch exceptions
     
     # Update invoice payment status
@@ -46,7 +49,7 @@ def process_payment_for_invoice(invoice_id: UUID, db: Session = Depends(get_db),
     return {'message': 'Invoice payment completed successfully'}
 
 
-@payment_router.get('/customer/all', status_code=status.HTTP_200_OK, response_class=List[schemas.PaymentResponse])
+@payment_router.get('/customer/all', status_code=status.HTTP_200_OK, response_model=List[schemas.PaymentResponse])
 def get_all_payments_for_customer(db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get all payment for a customer'''
     
@@ -59,7 +62,7 @@ def get_all_payments_for_customer(db: Session = Depends(get_db), current_user: u
     return payments
 
 
-@payment_router.get('/vendor/all', status_code=status.HTTP_200_OK, response_class=List[schemas.PaymentResponse])
+@payment_router.get('/vendor/all', status_code=status.HTTP_200_OK, response_model=List[schemas.PaymentResponse])
 def get_all_payments_for_vendor(db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get all payment for a customer'''
     
@@ -72,7 +75,7 @@ def get_all_payments_for_vendor(db: Session = Depends(get_db), current_user: use
     return payments
 
 
-@payment_router.get('/{id}/fetch', status_code=status.HTTP_200_OK, response_class=schemas.PaymentResponse)
+@payment_router.get('/{id}/fetch', status_code=status.HTTP_200_OK, response_model=schemas.PaymentResponse)
 def get_payment_by_id(id: UUID, db: Session = Depends(get_db), current_user: user_models.User = Depends(oauth2.get_current_user)):
     '''Endpoint to get a single payment record'''
     

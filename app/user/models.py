@@ -82,6 +82,6 @@ class Vendor(Base):
     user = relationship('User', back_populates='vendor')
     products = relationship('Product', back_populates='vendor')
     invoices = relationship('Invoice', back_populates='vendor')
-    payments = relationship('Payment', back_populates='customer')
+    payments = relationship('Payment', back_populates='vendor')
     
     
